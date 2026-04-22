@@ -68,11 +68,6 @@ Tools Used:
 | Ubuntu | 24.04 LTS | Host OS for the entire lab |
 | VirtualBox | 7.1.0 | Hypervisor running on Windows host |
 | Wazuh | 4.14.4 | SIEM — all-in-one deployment |
-| Minikube | 1.38.1 | Single-node Kubernetes cluster |
-| Docker | 29.3.0 | Container runtime/Minikube driver |
-| Calico | 3.31.5 | Kubernetes CNI, enforces NetworkPolicies |
-
-VM Specs: 6GB RAM · 4 CPUs · SSD storage · VMSVGA graphics
 
 Development Environment Specs:
 
@@ -184,11 +179,6 @@ Wazuh syscheck: File added to the system
 | T1110 | Brute Force | SSH loop (20 attempts) | Rule 5710 | ✅ Detected |
 | T1068 | Privilege Escalation | sudo su | Rule 5402 | ✅ Detected |
 | T1105 | Ingress Tool Transfer | /etc/backdoor-test.sh |Syscheck | ✅ Detected |
-| T1021 | Lateral Movement: Remote Services | K8s namespace crossing | Calico block | ✅ Blocked (see K8s lab) |
-| T1046 | Network Service Scanning | Blocked connection attempts | Calico timeout | ✅ Blocked (see K8s lab) |
-| T1041 | Exfiltration Over C2 Channel | Database egress deny-all | Calico block | ✅ Blocked (see K8s lab) |
-
-The first three techniques are detected by Wazuh at the host level. The last three are blocked by Calico at the network level. Together they demonstrate complementary Zero Trust controls across two layers.
 
 ---
 
@@ -199,11 +189,8 @@ The first three techniques are detected by Wazuh at the host level. The last thr
 | SSH brute force (20 attempts) | Wazuh | 5710 | T1110 | ✅ Detected |
 | Privilege escalation via sudo | Wazuh | 5402, 5501, 5502 | T1068 | ✅ Detected |
 | Suspicious file in /etc/ | Wazuh syscheck | File integrity alert | T1105 | ✅ Detected |
-| Frontend → Database (K8s) | Calico | NetworkPolicy block | T1021 | ✅ Blocked |
-| Backend → Frontend (K8s) | Calico | NetworkPolicy block | T1046 | ✅ Blocked |
-| Database egress | Calico | Egress deny-all | T1041 | ✅ Blocked |
 
-All simulated attack techniques were either detected by Wazuh or blocked by Calico. No technique went unaddressed across the two-layer defence.
+All simulated attack techniques were detected by Wazuh. No technique went unaddressed across the defence.
 
 ---
 
