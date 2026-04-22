@@ -6,7 +6,7 @@
 ### Table of Contents
 
 1. [Project Overview](#project-overview)
-2. [Zero Trust Defence Architecture](#zero-trust-defence-architecture)
+2. [Architecture](#architecture)
 3. [Lab Environment](#lab-environment)
 4. [Wazuh Installation](#wazuh-installation)
 5. [Attack Simulations](#attack-simulations)
@@ -31,31 +31,29 @@ This lab is the detection and visibility layer that complements the K8s Security
 
 The combination demonstrates that Zero Trust is not a single product — it is a layered strategy where blocking and detection work together.
 
-### Zero Trust Defence Architecture
+### Architecture
 <pre>
-┌──────────────────────────────────────────────────────────┐
-│                    Ubuntu 24.04 VM                       │
-│                  6GB RAM · 4 CPUs · VirtualBox           │
-│                                                          │
-│   ┌─────────────────────┐   ┌────────────────────────┐   │
-│   │    Wazuh SIEM       │   │   Minikube Cluster     │   │
-│   │                     │   │                        │   │
-│   │  ┌───────────────┐  │   │  [Nginx]  frontend ns  │   │
-│   │  │   Manager     │  │   │     │                  │   │
-│   │  │   Indexer     │  │   │  [Flask]  backend ns   │   │
-│   │  │   Dashboard   │  │   │     │                  │   │
-│   │  └───────────────┘  │   │  [Postgres] database ns│   │
-│   │                     │   │                        │   │
-│   │  Detects:           │   │  Calico blocks:        │   │
-│   │  · Brute force      │   │  · Lateral movement    │   │
-│   │  · Priv escalation  │   │  · Unauthorised access │   │
-│   │  · File changes     │   │  · Policy violations   │   │
-│   └─────────────────────┘   └────────────────────────┘   │
-│                                                          │
-└──────────────────────────────────────────────────────────┘
+┌──────────────────────────────┐
+│         Ubuntu 24.04 VM      │
+│                              │         
+│                              │
+│   ┌─────────────────────┐    │
+│   │    Wazuh SIEM       │    │   
+│   │                     │    │      
+│   │  ┌───────────────┐  │    │  
+│   │  │   Manager     │  │    │    
+│   │  │   Indexer     │  │    │  
+│   │  │   Dashboard   │  │    │     
+│   │  └───────────────┘  │    │  
+│   │                     │    │                        
+│   │  Detects:           │    │  
+│   │  · Brute force      │    │  
+│   │  · Priv escalation  │    │  
+│   │  · File changes     │    │
+│   └─────────────────────┘    │
+│                              │
+└──────────────────────────────┘
 </pre>
-
-Attack simulation → Wazuh detects → Calico blocks → Zero Trust enforced
 
 ---
 
