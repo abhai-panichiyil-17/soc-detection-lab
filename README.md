@@ -20,9 +20,9 @@
 
 ### Project Overview
 
-This lab demonstrates a Security Operations Centre (SOC) detection capability using Wazuh 4.14.4 deployed on an Ubuntu 24.04 VM. Real attack simulations are executed locally — SSH brute force, privilege escalation, and suspicious file creation — and detected by Wazuh in real time, with alerts automatically mapped to MITRE ATT&CK techniques.
+This lab demonstrates a Security Operations Centre (SOC) detection capability using Wazuh 4.14.4 deployed on an Ubuntu 24.04 VM. Real attack simulations are executed locally, such as SSH brute force, privilege escalation, and suspicious file creation, and is detected by Wazuh in real time, with alerts automatically mapped to MITRE ATT&CK techniques.
 
-This lab is the detection and visibility layer that complements the K8s Security Lab, which enforces network-level blocking via Calico NetworkPolicies. Together, the two labs implement a dual-layer Zero Trust defence strategy: 
+This lab is the detection and visibility layer that complements the [K8s Security Lab](https://github.com/abhai-panichiyil-17/k8s-security-lab), which enforces network-level blocking via Calico NetworkPolicies.
 
 | Layer | Tool | Function |
 |-------|------|----------|
@@ -94,7 +94,7 @@ Install Command
 curl -sO https://packages.wazuh.com/4.14/wazuh-install.sh
 sudo bash ./wazuh-install.sh -a
 </pre>
-The _-a_ flag runs the all-in-one installer, provisioning the manager, indexer, and dashboard together. Installation takes approximately 10-15 minutes. The indexer stage can appear to stall for several minutes — this is normal.
+The _-a_ flag runs the all-in-one installer, provisioning the manager, indexer, and dashboard together. Installation takes approximately 10-15 minutes. The indexer stage can appear to stall for several minutes.
 Access the Dashboard
 <pre> URL:  https://127.0.0.1
 </pre>
@@ -114,7 +114,7 @@ All three should show _Active (running)_.
 
 ### Attack Simulations
 
-All attacks were simulated locally on the Ubuntu VM. The goal is to generate realistic attack telemetry that Wazuh can detect, rather than attacking external systems. \
+All attacks were simulated locally on the Ubuntu VM. The goal is to generate realistic attack telemetry that Wazuh can detect, rather than attacking external systems. 
 - Simulation 1 — SSH Brute Force
 Technique: T1110 — Brute Force
 <pre>
@@ -196,16 +196,16 @@ All simulated attack techniques were detected by Wazuh. No technique went unaddr
 soc-detection-lab/
 ├── README.md
 ├── config/
-│   └── ossec.conf               # Wazuh agent/manager config
+│   └── ossec.conf               
 ├── screenshots/
 │   ├── dashboard/
-│   │   └── overview.png         # Wazuh dashboard overview
+│   │   └── overview.png       
 │   └── alerts/
-│       ├── ssh-brute-force.png  # Rule 5710 alert evidence
-│       ├── privilege-escalation.png  # Rule 5402 alert evidence
-│       └── mitre-mapping.png    # MITRE ATT&CK coverage view
+│       ├── ssh-brute-force.png  
+│       ├── privilege-escalation.png  
+│       └── mitre-mapping.png   
 └── docs/
-    └── attack-runbook.md        # Step-by-step attack simulation guide
+    └── attack-runbook.md        
 </pre>
 
 ---
