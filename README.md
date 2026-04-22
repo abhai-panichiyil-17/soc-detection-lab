@@ -18,7 +18,7 @@
 
 ---
 
-###Project Overview
+### Project Overview
 
 This lab demonstrates a Security Operations Centre (SOC) detection capability using Wazuh 4.14.4 deployed on an Ubuntu 24.04 VM. Real attack simulations are executed locally — SSH brute force, privilege escalation, and suspicious file creation — and detected by Wazuh in real time, with alerts automatically mapped to MITRE ATT&CK techniques.
 
