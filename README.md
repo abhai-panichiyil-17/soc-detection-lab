@@ -97,12 +97,11 @@ sudo bash ./wazuh-install.sh -a
 The _-a_ flag runs the all-in-one installer, provisioning the manager, indexer, and dashboard together. Installation takes approximately 10-15 minutes. The indexer stage can appear to stall for several minutes — this is normal.
 Access the Dashboard
 <pre> URL:  https://127.0.0.1
-User: admin
-Pass: (generated at end of install — save immediately)
 </pre>
-For access from the Windows host browser, configure port forwarding in VirtualBox:
-<pre>Host port 8443 → Guest port 443
-</pre>
+> Note:
+> - Username: admin
+> - Password generated at the end of installation
+
 Verify Services Running
 <pre>
 sudo systemctl status wazuh-manager
