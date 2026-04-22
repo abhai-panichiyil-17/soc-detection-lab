@@ -9,12 +9,12 @@
 2. [Zero Trust Defence Architecture](#zero-trust-architecture)
 3. [Lab Environment](#lab-environment)
 4. [Wazuh Installation](#wazuh-installation)
-5. [Attack Simulations](#attack-simulation)
-6. [Detections & Alerts](#detections-alerts)
-7. [MITRE ATT&CK Mapping](#)
-8. [Results Summary](#)
-9. [Repository Structure](#)
-10. [Key Concepts Reference](#)
+5. [Attack Simulations](#attack-simulations)
+6. [Detections & Alerts](#detections--alerts)
+7. [MITRE ATT&CK Mapping](#mitre-attck-mapping)
+8. [Results Summary](#results-summary)
+9. [Repository Structure](#repository-structure)
+10. [Key Concepts Reference](#key-concepts-reference)
 
 ---
 
