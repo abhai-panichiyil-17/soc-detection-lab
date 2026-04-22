@@ -61,16 +61,29 @@ Attack simulation → Wazuh detects → Calico blocks → Zero Trust enforced
 
 ### Lab Environment
 
+Tools Used:
+
 | Component | Version | Purpose |
 |-----------|---------|---------|
 | Ubuntu | 24.04 LTS | Host OS for the entire lab |
 | VirtualBox | 7.1.0 | Hypervisor running on Windows host |
 | Wazuh | 4.14.4 | SIEM — all-in-one deployment |
-| Minikube | Latest | Single-node Kubernetes cluster |
+| Minikube | 1.38.1 | Single-node Kubernetes cluster |
 | Docker | 29.3.0 | Container runtime/Minikube driver |
-| Calico | Latest | Kubernetes CNI, enforces NetworkPolicies |
+| Calico | 3.31.5 | Kubernetes CNI, enforces NetworkPolicies |
 
 VM Specs: 6GB RAM · 4 CPUs · SSD storage · VMSVGA graphics
+
+Development Environment Specs:
+
+| Component | Host Machine (Physical) | Virtual Machine (Guest) |
+| :--- | :--- | :--- |
+| OS | Windows 11 | Ubuntu 24.04 LTS |
+| CPU | Intel i7-13620H (16 Threads) | 10 vCPUs |
+| RAM | 16 GB | 9 GB (9080 MB) |
+| Storage | 1 TB NVMe SSD | 500 GB VDI (Dynamic) | 
+| GPU | NVIDIA RTX 4060 (8 GB) | VMSVGA (128 MB VRAM) |
+| Hypervisor | N/A | VirtualBox 7.1.0 |
 
 Wazuh Components Installed: \
 Wazuh was deployed using the all-in-one installer, which provisions three components on a single node:
