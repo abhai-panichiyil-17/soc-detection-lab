@@ -6,7 +6,7 @@
 ### Table of Contents
 
 1. [Project Overview](#project-overview)
-2. [Zero Trust Defence Architecture](#zero-trust-architecture)
+2. [Zero Trust Defence Architecture](#zero-trust-defence-architecture)
 3. [Lab Environment](#lab-environment)
 4. [Wazuh Installation](#wazuh-installation)
 5. [Attack Simulations](#attack-simulations)
@@ -22,8 +22,13 @@
 
 This lab demonstrates a Security Operations Centre (SOC) detection capability using Wazuh 4.14.4 deployed on an Ubuntu 24.04 VM. Real attack simulations are executed locally — SSH brute force, privilege escalation, and suspicious file creation — and detected by Wazuh in real time, with alerts automatically mapped to MITRE ATT&CK techniques.
 
-This lab is the detection and visibility layer that complements the K8s Security Lab, which enforces network-level blocking via Calico NetworkPolicies. Together, the two labs implement a dual-layer Zero Trust defence strategy: \
-LayerToolFunctionNetworkCalico CNIBlocks lateral movement between Kubernetes namespacesHost/SIEMWazuhDetects and alerts on attack attempts at the OS level
+This lab is the detection and visibility layer that complements the K8s Security Lab, which enforces network-level blocking via Calico NetworkPolicies. Together, the two labs implement a dual-layer Zero Trust defence strategy: 
+
+| Layer | Tool | Function |
+|-------|------|----------|
+| Network | Calico CNI | Blocks lateral movement between Kubernetes namespaces | 
+|Host/SIEM | Wazuh | Detects and alerts on attack attempts at the OS level |
+
 The combination demonstrates that Zero Trust is not a single product — it is a layered strategy where blocking and detection work together.
 
 ### Zero Trust Defence Architecture
@@ -56,14 +61,23 @@ Attack simulation → Wazuh detects → Calico blocks → Zero Trust enforced
 
 ### Lab Environment
 
-ComponentVersionPurposeUbuntu24.04 LTSHost OS for the entire labVirtualBox7.1.0Hypervisor running on Windows hostWazuh4.14.4SIEM — all-in-one deploymentMinikubeLatestSingle-node Kubernetes clusterDocker29.3.0Container runtime / Minikube driverCalicoLatestKubernetes CNI — enforces NetworkPolicies
+| Component | Version | Purpose |
+|-----------|---------|---------|
+| Ubuntu | 24.04 LTS | Host OS for the entire lab |
+| VirtualBox | 7.1.0 | Hypervisor running on Windows host |
+| Wazuh | 4.14.4 | SIEM — all-in-one deployment |
+| Minikube | Latest | Single-node Kubernetes cluster |
+| Docker | 29.3.0 | Container runtime/Minikube driver |
+| Calico | Latest | Kubernetes CNI, enforces NetworkPolicies |
+
 VM Specs: 6GB RAM · 4 CPUs · SSD storage · VMSVGA graphics
-Wazuh Components Installed:
+
+Wazuh Components Installed: \
 Wazuh was deployed using the all-in-one installer, which provisions three components on a single node:
 
-Wazuh Manager — the core engine that receives logs, applies detection rules, and generates alerts
-Wazuh Indexer — stores all alert and log data (built on OpenSearch)
-Wazuh Dashboard — web UI for visualising alerts, agent status, and MITRE ATT&CK coverage
+- Wazuh Manager — the core engine that receives logs, applies detection rules, and generates alerts
+- Wazuh Indexer — stores all alert and log data (built on OpenSearch)
+- Wazuh Dashboard — web UI for visualising alerts, agent status, and MITRE ATT&CK coverage
 
 ---
 
@@ -71,21 +85,25 @@ Wazuh Dashboard — web UI for visualising alerts, agent status, and MITRE ATT&C
 
 Install Command
 <pre>
-bashcurl -sO https://packages.wazuh.com/4.14/wazuh-install.sh
+curl -sO https://packages.wazuh.com/4.14/wazuh-install.sh
 sudo bash ./wazuh-install.sh -a
 </pre>
-The -a flag runs the all-in-one installer, provisioning the manager, indexer, and dashboard together. Installation takes approximately 10-15 minutes. The indexer stage can appear to stall for several minutes — this is normal.
+The _-a_ flag runs the all-in-one installer, provisioning the manager, indexer, and dashboard together. Installation takes approximately 10-15 minutes. The indexer stage can appear to stall for several minutes — this is normal.
 Access the Dashboard
-URL:  https://127.0.0.1
+<pre> URL:  https://127.0.0.1
 User: admin
 Pass: (generated at end of install — save immediately)
+</pre>
 For access from the Windows host browser, configure port forwarding in VirtualBox:
-Host port 8443 → Guest port 443
+<pre>Host port 8443 → Guest port 443
+</pre>
 Verify Services Running
-bashsudo systemctl status wazuh-manager
+<pre>
+sudo systemctl status wazuh-manager
 sudo systemctl status wazuh-indexer
 sudo systemctl status wazuh-dashboard
-All three should show Active (running).
+</pre>
+All three should show _Active (running)_.
 
 ---
 
@@ -93,63 +111,86 @@ All three should show Active (running).
 
 All attacks were simulated locally on the Ubuntu VM. The goal is to generate realistic attack telemetry that Wazuh can detect, rather than attacking external systems. \
 - Simulation 1 — SSH Brute Force
-Technique: T1110 — Brute Force \
-bashfor i in {1..20}; do ssh fakeuser@localhost; done \
-This loop attempts 20 SSH logins using a non-existent username. Each failed attempt generates an authentication failure log entry in /var/log/auth.log, which Wazuh monitors continuously.
-What Wazuh sees: Repeated authentication failures from the same source in a short window — a classic brute force pattern.
+Technique: T1110 — Brute Force
+<pre>
+for i in {1..20}; do ssh fakeuser@localhost; done 
+</pre>
+This loop attempts 20 SSH logins using a non-existent username. Each failed attempt generates an authentication failure log entry in _/var/log/auth.log_, which Wazuh monitors continuously.
+What Wazuh sees: Repeated authentication failures from the same source in a short window which is a classic brute force pattern.
+
 - Simulation 2 — Privilege Escalation
-Technique: T1068 — Exploitation for Privilege Escalation \
-bashsudo su \
-Switching to root via sudo generates PAM (Pluggable Authentication Module) session events, which Wazuh captures and flags as privilege escalation activity.
+Technique: T1068 — Exploitation for Privilege Escalation 
+<pre>sudo su 
+</pre>    
+Switching to root via _sudo_ generates PAM (Pluggable Authentication Module) session events, which Wazuh captures and flags as privilege escalation activity.
+
 - Simulation 3 — Suspicious File Creation
-Technique: T1105 — Ingress Tool Transfer \
-bashsudo touch /etc/backdoor-test.sh \
-Creating a file in /etc/ — a sensitive system directory — triggers Wazuh's file integrity monitoring (syscheck). Wazuh monitors changes to critical directories and alerts when new files appear. 
+Technique: T1105 — Ingress Tool Transfer 
+<pre>sudo touch /etc/backdoor-test.sh 
+</pre>
+Creating a file in _/etc/_ which is a sensitive system directory triggers Wazuh's file integrity monitoring (syscheck). Wazuh monitors changes to critical directories and alerts when new files appear. 
 
-Cleanup: Remove the test file after the simulation: sudo rm /etc/backdoor-test.sh
-
+Cleanup: Remove the test file after the simulation: 
+<pre>sudo rm /etc/backdoor-test.sh
+</pre>
 ---
 
 ### Detections & Alerts
 
-- SSH Brute Force — Rule 5710 
+* SSH Brute Force — Rule 5710 
 Wazuh Rule 5710 fires on each attempt to authenticate with a non-existent user: \
-Rule 5710: sshd: Attempt to login using non-existent user \
+Rule 5710: sshd: Attempt to login using non-existent user 
 
-Trigger: Each failed SSH login to a non-existent account \
-Log source: /var/log/auth.log \
-MITRE mapping: T1110 — Brute Force \
-Evidence: Alert spike visible in Wazuh dashboard timeline
+  - Trigger: Each failed SSH login to a non-existent account 
+  - Log source: /var/log/auth.log 
+  - MITRE mapping: T1110 — Brute Force 
+  - Evidence: Alert spike visible in Wazuh dashboard timeline
 
-- Privilege Escalation — Rule 5402 \
+* Privilege Escalation — Rule 5402 
 Rule 5402: Successful sudo to ROOT executed
 
-Trigger: sudo su executed successfully \
-Supporting rules: 5501 (PAM session open), 5502 (PAM session close) \
-MITRE mapping: T1068 — Exploitation for Privilege Escalation \
-Evidence: Alert visible in Security Events panel with MITRE tag \
+  - Trigger: sudo su executed successfully 
+  - Supporting rules: 5501 (PAM session open), 5502 (PAM session close) 
+  - MITRE mapping: T1068 — Exploitation for Privilege Escalation 
+  - Evidence: Alert visible in Security Events panel with MITRE tag 
 
-- File Integrity — Syscheck
+* File Integrity — Syscheck \
 Wazuh syscheck: File added to the system
 
-Trigger: New file created in monitored directory (/etc/) \
-Default scan interval: 6 hours (can be forced manually) \
-MITRE mapping: T1105 — Ingress Tool Transfer \
-Evidence: Syscheck alert in dashboard with file path and hash \
+  - Trigger: New file created in monitored directory (/etc/) 
+  - Default scan interval: 6 hours (can be forced manually) 
+  - MITRE mapping: T1105 — Ingress Tool Transfer 
+  - Evidence: Syscheck alert in dashboard with file path and hash 
 
 ---
 
 ### MITRE ATT&CK Mapping
 
-Technique IDTechnique NameSimulationWazuh RuleResultT1110Brute ForceSSH loop (20 attempts)Rule 5710✅ DetectedT1068Privilege Escalationsudo suRule 5402✅ DetectedT1105Ingress Tool Transfer/etc/backdoor-test.shSyscheck✅ DetectedT1021Lateral Movement: Remote ServicesK8s namespace crossingCalico block✅ Blocked (see K8s lab)T1046Network Service ScanningBlocked connection attemptsCalico timeout✅ Blocked (see K8s lab)T1041Exfiltration Over C2 ChannelDatabase egress deny-allCalico block✅ Blocked (see K8s lab)
+| Technique ID | Technique Name | Simulation | Wazuh Rule | Result |
+|--------------|----------------|------------|-------------|--------|
+| T1110 | Brute Force | SSH loop (20 attempts) | Rule 5710 | ✅ Detected |
+| T1068 | Privilege Escalation | sudo su | Rule 5402 | ✅ Detected |
+| T1105 | Ingress Tool Transfer | /etc/backdoor-test.sh |Syscheck | ✅ Detected |
+| T1021 | Lateral Movement: Remote Services | K8s namespace crossing | Calico block | ✅ Blocked (see K8s lab) |
+| T1046 | Network Service Scanning | Blocked connection attempts | Calico timeout | ✅ Blocked (see K8s lab) |
+| T1041 | Exfiltration Over C2 Channel | Database egress deny-all | Calico block | ✅ Blocked (see K8s lab) |
 
 The first three techniques are detected by Wazuh at the host level. The last three are blocked by Calico at the network level. Together they demonstrate complementary Zero Trust controls across two layers.
 
 ---
 
-###Results Summary
-SimulationToolRule FiredMITREOutcomeSSH brute force (20 attempts)Wazuh5710T1110✅ DetectedPrivilege escalation via sudoWazuh5402, 5501, 5502T1068✅ DetectedSuspicious file in /etc/Wazuh syscheckFile integrity alertT1105✅ DetectedFrontend → Database (K8s)CalicoNetworkPolicy blockT1021✅ BlockedBackend → Frontend (K8s)CalicoNetworkPolicy blockT1046✅ BlockedDatabase egressCalicoEgress deny-allT1041✅ Blocked
-All simulated attack techniques were either detected by Wazuh or blocked by Calico — no technique went unaddressed across the two-layer defence.
+### Results Summary
+ 
+| Simulation | Tool | Rule Fired | MITRE | Outcome |
+|------------|-----|-------------|-------|---------|
+| SSH brute force (20 attempts) | Wazuh | 5710 | T1110 | ✅ Detected |
+| Privilege escalation via sudo | Wazuh | 5402, 5501, 5502 | T1068 | ✅ Detected |
+| Suspicious file in /etc/ | Wazuh syscheck | File integrity alert | T1105 | ✅ Detected |
+| Frontend → Database (K8s) | Calico | NetworkPolicy block | T1021 | ✅ Blocked |
+| Backend → Frontend (K8s) | Calico | NetworkPolicy block | T1046 | ✅ Blocked |
+| Database egress | Calico | Egress deny-all | T1041 | ✅ Blocked |
+
+All simulated attack techniques were either detected by Wazuh or blocked by Calico. No technique went unaddressed across the two-layer defence.
 
 ---
 
@@ -174,7 +215,7 @@ soc-detection-lab/
 
 ### Key Concepts Reference
 
-_ What is Wazuh?
+- What is Wazuh?
 Wazuh is an open-source SIEM (Security Information and Event Management) platform. It collects logs from monitored systems, applies detection rules, generates alerts, and maps findings to the MITRE ATT&CK framework. It provides the visibility layer that complements network-level controls like Calico.
 
 - What is SIEM?
@@ -184,10 +225,10 @@ A Security Information and Event Management system aggregates log data from acro
 MITRE ATT&CK is a globally recognised framework that categorises adversary tactics and techniques based on real-world observations. Mapping detections to ATT&CK techniques allows security teams to understand not just that something happened, but what stage of an attack it represents.
 
 - Why Wazuh + Calico Together?
-Calico prevents unauthorised traffic from reaching its destination — it blocks the attack at the network layer. Wazuh detects that an attack was attempted — it provides visibility at the host layer. A Zero Trust architecture needs both: blocking alone leaves you blind, and detection alone doesn't stop anything.
+Calico prevents unauthorised traffic from reaching its destination as it blocks the attack at the network layer. Wazuh detects that an attack was attempted and it provides visibility at the host layer. A Zero Trust architecture needs both as blocking alone leaves you blind, and detection alone doesn't stop anything.
 
 - What is File Integrity Monitoring (syscheck)?
-Wazuh's syscheck module monitors critical directories (like /etc/) for changes — new files, modified files, deleted files, and permission changes. If an attacker drops a malicious script or modifies a config file, syscheck catches it and alerts.
+Wazuh's syscheck module monitors critical directories (like _/etc/_) for changes such as adding new files, modifying and deleting files, and permission changes. If an attacker drops a malicious script or modifies a config file, syscheck catches it and alerts.
 
 ---
 
