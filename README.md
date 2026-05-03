@@ -25,7 +25,7 @@ This lab demonstrates a Security Operations Centre (SOC) detection capability us
 This lab is the detection and visibility layer that complements the [K8s Security Lab](https://github.com/abhai-panichiyil-17/k8s-security-lab), which enforces network-level blocking via Calico NetworkPolicies.
 
 | Layer | Tool | Function |
-|-------|------|----------|
+|-------|------|---------|
 | Network | Calico CNI | Blocks lateral movement between Kubernetes namespaces | 
 |Host/SIEM | Wazuh | Detects and alerts on attack attempts at the OS level |
 
